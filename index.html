@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quel aventurier es-tu ?</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1b130d;--bg2:#2a1d12;--card:#f0e2c0;--ink:#3a2412;--accent:#8c1c13;--gold:#c9a24b;--text:#f0e2c0}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,var(--bg2),var(--bg));color:var(--text);font-family:"IM Fell English",Georgia,serif;font-size:19px;display:flex;justify-content:center;padding:24px 14px}
+.wrap{width:100%;max-width:660px}
+h1,h2,h3,.btn,.opt b{font-family:Cinzel,Georgia,serif}
+h1{text-align:center;font-size:2rem;margin:.2em 0;color:var(--gold);text-shadow:0 2px 0 #0006;letter-spacing:.04em}
+.sub{text-align:center;font-style:italic;margin-bottom:22px;opacity:.9}
+.card{background:var(--card);color:var(--ink);border:3px double var(--accent);border-radius:10px;padding:24px 20px;box-shadow:0 8px 24px #0008}
+h2{margin:0 0 16px;font-size:1.3rem;color:var(--accent)}
+.bar{height:8px;background:#0003;border-radius:5px;margin-bottom:18px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));transition:width .4s}
+.opt{display:block;width:100%;text-align:left;margin:10px 0;padding:13px 15px;background:#fff6;border:2px solid #8c1c1355;border-radius:8px;color:var(--ink);font:inherit;cursor:pointer;transition:.15s}
+.opt:hover,.opt:focus-visible{background:#8c1c1318;border-color:var(--accent);transform:translateX(4px);outline:none}
+.opt b{color:var(--accent);margin-right:8px}
+input{width:100%;padding:12px;font:inherit;font-size:1.1rem;border:2px solid var(--accent);border-radius:8px;background:#fffa;color:var(--ink);margin:6px 0 16px}
+.btn{background:var(--accent);color:#f6e6c0;border:0;padding:12px 22px;border-radius:8px;font-size:1rem;cursor:pointer;letter-spacing:.05em}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.alt{background:transparent;color:var(--accent);border:2px solid var(--accent)}
+.small{font-size:.85rem;opacity:.8}
+.race{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-bottom:1px solid #8c1c1333}
+.race:last-of-type{border-bottom:0}
+.num{font-family:Cinzel,Georgia,serif;font-size:2rem;color:var(--gold);line-height:1;text-shadow:0 1px 0 var(--accent)}
+.race h3{margin:0;color:var(--accent);font-size:1.2rem}
+.race p{margin:.3em 0 0}
+.tag{font-size:.8rem;opacity:.75;font-style:italic}
+.recap{text-align:left;white-space:pre-wrap;font:inherit;font-size:.9rem;background:#fff6;border:1px dashed var(--accent);border-radius:8px;padding:10px;margin-top:14px}
+.center{text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>⚔ Quel aventurier es-tu ? ⚔</h1>
+  <div class="sub">Le destin va te révéler les peuples qui t’appellent…</div>
+  <div class="card" id="card"></div>
+</div>
+<script>
+/* ============ RÉGLAGE POUR LE MAÎTRE DU JEU ============
+   Colle ici l’adresse de ton formulaire privé (voir les instructions).
+   Exemple : "https://formspree.io/f/abcdwxyz"
+   Si vide, les joueurs devront copier leurs réponses et te les envoyer en message privé. */
+const ENDPOINT = "";
+/* ======================================================== */
+
+const Q=[
+{q:"Si je devais incarner un personnage il serait plutôt ?",a:["Humanoïde, 2 bras, 2 jambes","Bestial, des poils et des crocs","Spirituel, des ailes et des cornes","Monstrueux, des griffes et 6 yeux"]},
+{q:"Moi dans un groupe ce que j’aime c’est ?",a:["Aider les autres","Assurer la sécurité","Élaborer des stratégies","Prendre les décisions"]},
+{q:"Et pour cela j’utilise ma principale qualité qui est ?",a:["Ma vivacité d’esprit","Mes aptitudes physiques","Ma chance","Mes dons"]},
+{q:"Parce que ce qui me caractérise le plus c’est ?",a:["L’optimisme","La passion","La créativité","La fiabilité"]},
+{q:"Mon élément de prédilection c’est ?",a:["Air","Feu","Terre","Eau"]}];
+
+/* Race : [nom, source, apparence(0-3), éléments, rôles, qualités, traits, description]
+   éléments : 0 air, 1 feu, 2 terre, 3 eau — rôles/qualités/traits : mêmes numéros que les réponses */
+const A=[0,1,2,3];
+const RACES=[
+// Humanoïdes
+["Humain","D&D",0,A,[3],[0,2],[0,1],"Adaptable et ambitieux, capable de tout."],
+["Elfe","D&D",0,[0],[2],[0],[2],"Gracieux et érudit, l’éternité devant lui."],
+["Nain","D&D",0,[2],[1],[1],[3],"Robuste et têtu, solide comme la montagne."],
+["Halfelin","D&D",0,[0,2],[0],[2],[0],"Petit, chanceux et courageux."],
+["Gnome","D&D",0,[2],[2],[0],[2],"Inventeur curieux au génie bouillonnant."],
+["Demi-elfe","D&D",0,[3],[3],[3],[0],"Charismatique, entre deux mondes."],
+["Drow","D&D",0,[2],[2],[3],[1],"Elfe des profondeurs, fier et rusé."],
+["Changelin","Eberron",0,[3],[2],[0],[2],"Il prend le visage qu’il désire."],
+["Kalashtar","Eberron",0,[0],[0],[3],[3],"Esprit lié à un rêveur spirituel."],
+["Githzerai","D&D",0,[0],[1],[0],[3],"Moine discipliné des plans chaotiques."],
+["Forgé de guerre","Eberron",0,[2],[1],[1],[3],"Construit pour protéger, avec une âme."],
+["Triton","D&D",0,[3],[0],[0],[3],"Gardien des profondeurs océaniques."],
+["Elfe des mers","Pathfinder",0,[3],[2],[0],[2],"Voyageur des vagues, libre et agile."],
+["Samsaran","Pathfinder",0,[0],[0],[0],[3],"Âme réincarnée, mémoire des vies passées."],
+["Eladrin","D&D",0,[0,1,2,3],[2],[3],[2],"Elfe féerique dont l’humeur change avec les saisons."],
+// Bestiaux
+["Tabaxi","D&D",1,[0],[2],[2],[2],"Félin agile en quête d’histoires."],
+["Drakéide","D&D",1,[1],[3],[1],[1],"Descendant des dragons, fier et flamboyant."],
+["Goliath","D&D",1,[2],[1],[1],[3],"Géant des cimes, force et honneur."],
+["Loxodon","D&D",1,[2],[0],[3],[3],"Sage éléphant, mémoire infaillible."],
+["Léonin","D&D",1,[1],[3],[1],[1],"Lion fier qui mène par l’exemple."],
+["Harengon","D&D",1,[0],[0],[2],[0],"Lièvre bondissant, chanceux et joyeux."],
+["Homme-lézard","D&D",1,[3],[1],[1],[3],"Survivant pragmatique des marais."],
+["Métamorphe","D&D/Eberron",1,[2],[1],[2],[1],"Instinct sauvage qui s’éveille sous la lune."],
+["Minotaure","D&D",1,[2],[3],[1],[1],"Cornu puissant, volonté de fer."],
+["Kitsune","Pathfinder",1,[1],[2],[2],[2],"Renard rusé aux mille visages."],
+["Ratfolk","Pathfinder",1,[2],[2],[0],[2],"Bricoleur malin, roi de la débrouille."],
+["Vanara","Pathfinder",1,[0],[0],[2],[0],"Singe vif, curieux et farceur."],
+["Tengu","Pathfinder",1,[0],[2],[2],[2],"Corbeau moqueur et opportuniste."],
+["Centaure","D&D",1,[2],[1],[1],[3],"Éclaireur galopant, fidèle à sa harde."],
+["Satyre","D&D",1,[0],[0],[2],[0],"Fêtard magique au cœur léger."],
+["Orque","Pathfinder",1,[1],[1],[1],[1],"Guerrier passionné au courage brut."],
+// Spirituels
+["Aasimar","D&D",2,[0],[0],[3],[0],"Touché par les cieux, une lumière le guide."],
+["Tieffelin","D&D",2,[1],[3],[3],[1],"Marqué par les enfers, cornes et mystère."],
+["Génasi","D&D",2,[0,1,2,3],[3],[3],[1],"Les éléments coulent dans ses veines."],
+["Fée","D&D",2,[0],[0],[2],[2],"Ailée et espiègle, magie innée."],
+["Sylphe","Pathfinder",2,[0],[2],[0],[2],"Esprit du vent, vif et insaisissable."],
+["Ifrit","Pathfinder",2,[1],[3],[3],[1],"Esprit du feu, orgueilleux et ardent."],
+["Ondin","Pathfinder",2,[3],[0],[3],[0],"Esprit des eaux, fluide et adaptable."],
+["Oréade","Pathfinder",2,[2],[1],[1],[3],"Esprit de la terre, patient et inébranlable."],
+["Shadar-kai","D&D",2,[3],[2],[3],[3],"Elfe de l’ombre lié à la Gisombre."],
+["Dhampir","Pathfinder",2,[3],[3],[3],[3],"Mi-vampire, séduisant et mélancolique."],
+["Aasimar ailé","Pathfinder",2,[0],[1],[3],[3],"Ailes immaculées, protecteur des innocents."],
+// Monstrueux
+["Aarakocra","D&D",3,[0],[0],[0],[0],"Homme-oiseau des cimes, maître du ciel."],
+["Gobelin","D&D",3,[1],[2],[2],[2],"Petit, rusé, inventif."],
+["Hobgobelin","D&D",3,[2],[3],[1],[3],"Soldat discipliné à l’honneur strict."],
+["Gobelours","D&D",3,[2],[1],[2],[1],"Massif et furtif, il surgit de l’ombre."],
+["Demi-orque","D&D",3,[1],[1],[1],[1],"Puissant et fier, volonté indomptable."],
+["Kobold","D&D",3,[1],[2],[0],[2],"Petit draconien fourbe et inventeur de pièges."],
+["Sang-pur Yuan-ti","D&D",3,[3],[3],[3],[3],"Serpent calculateur au regard hypnotique."],
+["Tortle","D&D",3,[3],[1],[1],[3],"Carapace épaisse, sérénité parfaite."],
+["Locathah","D&D",3,[3],[0],[0],[0],"Peuple des abysses, vif et solidaire."],
+["Kenku","D&D",3,[0],[2],[0],[2],"Corbeau sans voix, imitateur de génie."],
+["Githyanki","D&D",3,[0],[3],[3],[1],"Guerrier-pillard chevauchant les dragons rouges."],
+["Grung","D&D",3,[3],[1],[2],[1],"Grenouille venimeuse et fière."],
+["Oni","Pathfinder",3,[1],[3],[3],[1],"Ogre magique, imposant et manipulateur."],
+["Skinwalker","Pathfinder",3,[2],[1],[2],[1],"Sauvage aux multiples formes."]
+];
+
+const card=document.getElementById("card");
+let name="",ans=[];
+const esc=s=>{const d=document.createElement("div");d.textContent=s;return d.innerHTML};
+
+function hash(str){let h=2166136261;for(const c of str){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return (h>>>0)/4294967296}
+
+function propose(){
+  const key=ans.join("");
+  const scored=RACES.map(r=>{
+    let s=0;const why=[];
+    if(r[2]===ans[0]){s+=5;why.push("apparence")}
+    if(r[3].includes(ans[4])){s+=3;why.push("élément")}
+    if(r[4].includes(ans[1])){s+=2;why.push("rôle")}
+    if(r[5].includes(ans[2])){s+=2;why.push("talent")}
+    if(r[6].includes(ans[3])){s+=1;why.push("caractère")}
+    return{r,s,why,t:hash(r[0]+key)};
+  }).sort((a,b)=>b.s-a.s||a.t-b.t);
+  return scored.slice(0,3);
+}
+
+function intro(){
+  card.innerHTML=`<h2>Qui ose entrer dans la taverne ?</h2><label>Inscris ton nom, voyageur :</label><input id="nm" maxlength="30" placeholder="Ton nom d’aventurier" autocomplete="off"><button class="btn" id="go" disabled>Commencer l’aventure</button>`;
+  const nm=document.getElementById("nm"),go=document.getElementById("go");
+  nm.oninput=()=>go.disabled=!nm.value.trim();
+  nm.onkeydown=e=>{if(e.key==="Enter"&&nm.value.trim())go.click()};
+  go.onclick=()=>{name=nm.value.trim();ans=[];ask(0)};
+}
+function ask(i){
+  const q=Q[i];
+  card.innerHTML=`<div class="bar"><i style="width:${i/Q.length*100}%"></i></div><div class="small">Question ${i+1} / ${Q.length}</div><h2>${esc(q.q)}</h2>`+q.a.map((t,k)=>`<button class="opt" data-k="${k}"><b>${"ABCD"[k]}.</b>${esc(t)}</button>`).join("");
+  card.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{ans[i]=+b.dataset.k;i+1<Q.length?ask(i+1):finish()});
+}
+async function finish(){
+  const top=propose();
+  const txt=`⚔ ${name}\n`+Q.map((q,i)=>`Q${i+1} : ${q.a[ans[i]]}`).join("\n")+`\nRaces proposées : ${top.map(t=>t.r[0]).join(", ")}`;
+  card.innerHTML=`<div class="center"><div class="small">Le destin a parlé, ${esc(name)}…</div><h2 style="margin-top:6px">Trois peuples t’appellent</h2></div>`+
+  top.map((t,i)=>`<div class="race"><div class="num">${i+1}</div><div><h3>${esc(t.r[0])} <span class="tag">· ${esc(t.r[1])}</span></h3><p>${esc(t.r[7])}</p><div class="tag">Affinités : ${esc(t.why.join(", "))}</div></div></div>`).join("")+
+  `<p class="center">Ta classe sera décidée par le Maître du Jeu, qui te prépare une proposition sur mesure…</p><p class="center small" id="st"></p><div class="center" id="act"></div>`;
+  const st=document.getElementById("st"),act=document.getElementById("act");
+  const manual=()=>{
+    st.textContent="Envoie tes réponses au Maître du Jeu en message privé :";
+    act.innerHTML=`<button class="btn" id="cp">Copier mes réponses</button><pre class="recap">${esc(txt)}</pre>`;
+    document.getElementById("cp").onclick=async e=>{try{await navigator.clipboard.writeText(txt);e.target.textContent="Copié ✔"}catch(x){prompt("Copie ce texte :",txt)}};
+  };
+  if(!ENDPOINT){manual();return}
+  st.textContent="Envoi de tes réponses au Maître du Jeu…";
+  try{
+    const body={name,message:txt};
+    Q.forEach((q,i)=>body["Q"+(i+1)]=q.a[ans[i]]);
+    body["races"]=top.map(t=>t.r[0]).join(", ");
+    const r=await fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(body)});
+    if(!r.ok)throw new Error();
+    st.textContent="✔ Tes réponses ont bien été envoyées au Maître du Jeu !";
+  }catch(e){manual()}
+}
+intro();
+</script>
+</body>
+</html>
